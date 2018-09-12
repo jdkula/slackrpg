@@ -75,7 +75,7 @@ class Roll(
     }
 
     fun sum(): Int {
-        return results.sumBy { it.roll } + modifier
+        return results.filter { !it.dropped }.sumBy { it.roll } + modifier
     }
 
     companion object {
