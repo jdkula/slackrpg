@@ -44,7 +44,7 @@ fun Application.main() {
     install(CORS) {
         anyHost()
     }
-    
+
     routing {
         get("/hello") {
             call.respond("Hello World!")
@@ -109,86 +109,5 @@ fun Application.main() {
             }
             default("index.html")
         }
-    }
-}
-
-
-suspend fun PipelineContext<Unit, ApplicationCall>.doRoll(
-    command: SlashCommand,
-    rollInfo: RollInfo,
-    secret: Boolean = false
-) {
-    try {
-        val rolls = Roll.parse(rollInfo.roll)
-        var text = rollInfo.description
-        if (!secret) {
-            val userName = Users[command.userId]?.profile?.real_name
-            text = "_${userName}_"
-            if (rollInfo.description.isNotEmpty()) {
-                text += ": ${rollInfo.description}"
-            }
-        }
-        if (rolls.size > 1 && !rollInfo.noSum) {
-            text += "\n*Total: ${rolls.sumBy { it.sum() }}*"
-        }
-        val attachments = rolls
-            .map {
-                val modifier =
-                    if (it.modifier > 0) " + ${it.modifier}" else if (it.modifier < 0) " - ${-it.modifier}" else ""
-                val fallback_text = "${it.request}: ${it.results.joinToString(" + ")}$modifier = ${it.sum()}"
-                val text = it.results.joinToString(" + ") { result ->
-                    when (result.dropped) {
-                        true -> "~${result.roll}~"
-                        false -> "${result.roll}"
-                    }
-                }
-                val percent_success = ((1.0 * it.sum() / it.maxPossible()) * 100).toInt()
-                val color = when (it.sum()) {
-                    it.maxPossible() -> "#00FF00"
-                    it.minPossible() -> "#FF0000"
-                    else -> when (percent_success) {
-                        in 1..30 -> "#FFA500"
-                        in 31..50 -> "#FFFF00"
-                        in 51..70 -> "#00abff"
-                        in 71..90 -> "#00f9ff"
-                        else -> "#008000"
-                    }
-                }
-                Attachment(
-                    fallback = "${it.request}: $fallback_text",
-                    text = text,
-                    color = color,
-                    title = "${it.request} = ${it.sum()}",
-                    mrkdwn_in = listOf("text", "title")
-                )
-            }
-
-        val message = Message(
-            command.channelId,
-            attachments = attachments,
-            text = text
-        )
-        if (secret) {
-            EphemeralMessage(command.userId, message).send()
-        } else {
-            message.send()
-        }
-        context.respond(HttpStatusCode.OK)
-    } catch (e: NumberFormatException) {
-        EphemeralMessage(
-            channel = command.channelId,
-            user = command.userId,
-            text = "I couldn't understand what you wrote."
-        ).send()
-        context.respond(HttpStatusCode.OK)
-    } catch (e: SunToolkit.InfiniteLoop) {
-        context.respondText("Roll Caused Infinite Loop", ContentType.Text.Plain, HttpStatusCode.BadRequest)
-    } catch (e: InvalidParameterException) {
-        EphemeralMessage(
-            channel = command.channelId,
-            user = command.userId,
-            text = "The limit on number of dice rolled is 500, for Slack's sanity."
-        ).send()
-        context.respond(HttpStatusCode.OK)
     }
 }

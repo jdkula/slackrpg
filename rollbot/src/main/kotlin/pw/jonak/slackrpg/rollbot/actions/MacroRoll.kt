@@ -5,7 +5,6 @@ import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.pipeline.PipelineContext
 import io.ktor.response.respond
-import pw.jonak.slackrpg.rollbot.doRoll
 import pw.jonak.slackrpg.rollbot.sql.Macros
 import pw.jonak.slackrpg.slack.SlashCommand
 import pw.jonak.slackrpg.slack.ephemeralMessage
