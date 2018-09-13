@@ -31,8 +31,9 @@ class Roll(
         }
         finishOperations.forEach { op ->
             op.apply(numSides, results)?.let { _results.addAll(it) }
-            if(op is Description) {
+            if (op is Description) {
                 description = op.text
+                request = request.replace("[$description]", "")  // Include the brackets when removing.
             }
         }
 
@@ -61,10 +62,7 @@ class Roll(
             }
         }
 
-        description?.let { description ->
-            request = request.replace(description, "")
-            request = request.trim('[', ']', '+', ' ', '\t', '\n')
-        }
+        request = request.trim('[', ']', '+', ' ', '\t', '\n')
     }
 
     fun toInt(): Int {

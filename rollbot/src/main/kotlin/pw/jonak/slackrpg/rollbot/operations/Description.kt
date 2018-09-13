@@ -20,7 +20,7 @@ class Description(val text: String) : Operation {
                 end++
             }
 
-            return Pair(Description(str.substring(1, end)), end)
+            return Pair(Description(str.substring(1, end)), end + 1) // to account for the final bracket, end + 1
         }
     }
 }

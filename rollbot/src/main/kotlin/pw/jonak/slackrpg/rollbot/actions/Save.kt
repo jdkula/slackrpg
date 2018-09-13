@@ -11,7 +11,7 @@ import pw.jonak.slackrpg.slack.SlashCommand
 import pw.jonak.slackrpg.slack.ephemeralMessage
 
 suspend fun PipelineContext<Unit, ApplicationCall>.save(command: SlashCommand) {
-    val macro = Macro.parse(command.command)
+    val macro = Macro.parse(command.text)
     val roll = macro.rollInfo
 
     Macros[command.userId, macro.macroName] = roll
