@@ -9,9 +9,7 @@ import pw.jonak.slackrpg.healthbot.characterInfo
 import pw.jonak.slackrpg.healthbot.sql.Character
 import pw.jonak.slackrpg.healthbot.sql.Characters
 import pw.jonak.slackrpg.slack.SlashCommand
-import pw.jonak.slackrpg.slack.attachment
 import pw.jonak.slackrpg.slack.ephemeralMessage
-import pw.jonak.slackrpg.slack.send
 
 suspend fun PipelineContext<Unit, ApplicationCall>.register(command: SlashCommand) {
     var request = command.text.trim()
@@ -36,17 +34,16 @@ suspend fun PipelineContext<Unit, ApplicationCall>.register(command: SlashComman
     val url = restMatch?.groups?.get(3)?.value
 
     if (characterName == null || maxHealth == null) {
-        send {
-            ephemeralMessage {
-                channel = command.channelId
-                user = command.userId
+        ephemeralMessage {
+            channel = command.channelId
+            user = command.userId
 
-                attachment {
-                    fallback = "Couldn't get character name or max health, which are required!"
-                    color = "#FF0000"
-                    text = fallback
-                }
+            attachment {
+                fallback = "Couldn't get character name or max health, which are required!"
+                color = "#FF0000"
+                text = fallback
             }
+            send()
         }
         call.respond(HttpStatusCode.OK)
         return
@@ -54,7 +51,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.register(command: SlashComman
 
     val tempHealth: Int
 
-    if(currentHealth != null && currentHealth > maxHealth) {
+    if (currentHealth != null && currentHealth > maxHealth) {
         tempHealth = currentHealth - maxHealth
         currentHealth = maxHealth
     } else {
@@ -73,50 +70,32 @@ suspend fun PipelineContext<Unit, ApplicationCall>.register(command: SlashComman
     )
 
     val oldCharacter = Characters[npcShortName ?: command.userId]
-    if (oldCharacter != null) {
-        if (oldCharacter.user == command.userId) {
-            send {
-                ephemeralMessage {
-                    channel = command.channelId
-                    user = command.userId
 
-                    characterInfo(newCharacter, overrideHidden = true) {
-                        fallback = "Your character has been updated!"
-                        pretext = fallback
+    ephemeralMessage {
+        channel = command.channelId
+        user = command.userId
 
-                        color = "#0000FF"
-                    }
-                }
+        if (oldCharacter != null && oldCharacter.user != command.userId) {  // Error: Shortname Taken
+            attachment {
+                fallback =
+                        "That character shortname is already taken by somebody else. Pick a different one."
+                color = "#FF0000"
+                pretext = fallback
             }
-        } else {
-            send {
-                ephemeralMessage {
-                    channel = command.channelId
-                    user = command.userId
-
-                    attachment {
-                        fallback = "That character shortname is already taken by somebody else. Pick a different one."
-                        text = fallback
-
-                        color = "#FF0000"
-                    }
-                }
-            }
-        }
-    } else {
-        send {
-            ephemeralMessage {
-                channel = command.channelId
-                user = command.userId
-
-                characterInfo(newCharacter, overrideHidden = true) {
+        } else {  // Success
+            characterInfo(newCharacter, overrideHidden = true) {
+                if (oldCharacter != null) {  // Character Update
+                    fallback = "Your character has been updated!"
+                    color = "#0000FF"
+                } else {  // Character Registration
                     fallback = "Your character has been registered!"
-                    pretext = fallback
-
                     color = "#00FF77"
+
                 }
+                pretext = fallback
             }
         }
+        send()
     }
 
     Characters += newCharacter

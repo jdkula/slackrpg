@@ -44,6 +44,7 @@ fun Application.main() {
     install(CORS) {
         anyHost()
     }
+    
     routing {
         get("/hello") {
             call.respond("Hello World!")

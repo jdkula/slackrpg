@@ -12,11 +12,6 @@ interface IMessage {
     suspend fun send()
 }
 
-interface IMessageBuilder {
-    var attachments: List<Attachment>?
-    fun toMessage(): IMessage
-}
-
 data class EphemeralMessage(
     val channel: String,
     val user: String,
@@ -48,21 +43,6 @@ data class EphemeralMessage(
     )
 }
 
-class EphemeralMessageBuilder : IMessageBuilder {
-    override var attachments: List<Attachment>? = null
-    lateinit var channel: String
-    lateinit var user: String
-    var text: String? = null
-    var as_user: Boolean? = null
-    var link_names: Boolean? = null
-    var parse: String? = null
-    var thread_ts: String? = null
-
-    override fun toMessage(): EphemeralMessage {
-        return EphemeralMessage(channel, user, text, as_user, attachments, link_names, parse, thread_ts)
-    }
-}
-
 
 class Message(
     val channel: String,
@@ -87,41 +67,5 @@ class Message(
             contentType(ContentType.Application.Json)
             body = Klaxon().toJsonString(this@Message)
         }
-    }
-}
-
-class MessageBuilder : IMessageBuilder {
-    lateinit var channel: String
-    var text: String? = null
-    var as_user: Boolean? = null
-    override var attachments: List<Attachment>? = null
-    var link_names: Boolean? = null
-    var parse: String? = null
-    var thread_ts: String? = null
-    var icon_emoji: String? = null
-    var icon_url: String? = null
-    var mrkdwn: Boolean? = null
-    var reply_broadcast: Boolean? = null
-    var unfurl_links: Boolean? = null
-    var unfurl_media: Boolean? = null
-    var username: String? = null
-
-    override fun toMessage(): Message {
-        return Message(
-            channel,
-            text,
-            as_user,
-            attachments,
-            link_names,
-            parse,
-            thread_ts,
-            icon_emoji,
-            icon_url,
-            mrkdwn,
-            reply_broadcast,
-            unfurl_links,
-            unfurl_media,
-            username
-        )
     }
 }

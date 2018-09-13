@@ -7,9 +7,7 @@ import io.ktor.pipeline.PipelineContext
 import io.ktor.response.respond
 import pw.jonak.slackrpg.healthbot.sql.Characters
 import pw.jonak.slackrpg.slack.SlashCommand
-import pw.jonak.slackrpg.slack.attachment
 import pw.jonak.slackrpg.slack.ephemeralMessage
-import pw.jonak.slackrpg.slack.send
 
 suspend fun PipelineContext<Unit, ApplicationCall>.unregister(command: SlashCommand) {
     val request = command.text.trim()
@@ -19,21 +17,21 @@ suspend fun PipelineContext<Unit, ApplicationCall>.unregister(command: SlashComm
     val targetCharacter = Characters[target, command.userId]
 
     if (targetCharacter == null || targetCharacter.user != command.userId) {
-        send {
-            ephemeralMessage {
-                channel = command.channelId
-                user = command.userId
+        ephemeralMessage {
+            channel = command.channelId
+            user = command.userId
 
-                attachment {
-                    fallback = if (targetCharacter == null) {
-                        "I couldn't find the character you're trying to unregister, or you haven't registered your own character yet."
-                    } else {
-                        "The character you're trying to unregister doesn't belong to you."
-                    }
-                    color = "#FF0000"
-                    text = fallback
+            attachment {
+                fallback = if (targetCharacter == null) {
+                    "I couldn't find the character you're trying to unregister, or you haven't registered your own character yet."
+                } else {
+                    "The character you're trying to unregister doesn't belong to you."
                 }
+                color = "#FF0000"
+                text = fallback
             }
+
+            send()
         }
         call.respond(HttpStatusCode.OK)
         return
@@ -41,17 +39,17 @@ suspend fun PipelineContext<Unit, ApplicationCall>.unregister(command: SlashComm
 
     Characters -= targetCharacter
 
-    send {
-        ephemeralMessage {
-            channel = command.channelId
-            user = command.userId
+    ephemeralMessage {
+        channel = command.channelId
+        user = command.userId
 
-            attachment {
-                fallback = "${targetCharacter.characterName} has been deleted."
-                text = fallback
-                color = "#0000FF"
-            }
+        attachment {
+            fallback = "${targetCharacter.characterName} has been deleted."
+            text = fallback
+            color = "#0000FF"
         }
+
+        send()
     }
 
     call.respond(HttpStatusCode.OK)

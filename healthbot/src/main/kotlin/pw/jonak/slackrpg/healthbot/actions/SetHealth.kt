@@ -18,41 +18,26 @@ suspend fun PipelineContext<Unit, ApplicationCall>.setHealth(command: SlashComma
 
     val targetCharacter = Characters[target, command.userId]
 
-    val newHealth = if(newHealthOption == "@max") {
+    val newHealth = if (newHealthOption == "@max") {
         targetCharacter?.maxHealth
     } else {
         newHealthOption?.toIntOrNull()
     }
 
-    if (targetCharacter == null || newHealth == null) {
-        send {
-            ephemeralMessage {
-                channel = command.channelId
-                user = command.userId
+    if (targetCharacter == null || newHealth == null || targetCharacter.user != command.userId) {
+        ephemeralMessage {
+            channel = command.channelId
+            user = command.userId
 
-                attachment {
+            attachment {
+                if (targetCharacter == null || newHealth == null) {
                     fallback =
                             "I couldn't find the character you're trying to set the health of, or you haven't registered your own character yet."
-                    color = "#FF0000"
-                    text = fallback
-                }
-            }
-        }
-        call.respond(HttpStatusCode.OK)
-        return
-    }
-
-    if(targetCharacter.user != command.userId) {
-        send {
-            ephemeralMessage {
-                channel = command.channelId
-                user = command.userId
-
-                attachment {
+                } else {
                     fallback = "You didn't register the character whose health you're trying to set!"
-                    color = "#FF0000"
-                    text = fallback
                 }
+                color = "#FF0000"
+                text = fallback
             }
         }
         call.respond(HttpStatusCode.OK)
@@ -62,7 +47,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.setHealth(command: SlashComma
     val tempHealth: Int
     val adjustedNewHealth: Int
 
-    if(newHealth > targetCharacter.maxHealth && !max) {
+    if (newHealth > targetCharacter.maxHealth && !max) {
         tempHealth = newHealth - targetCharacter.maxHealth
         adjustedNewHealth = targetCharacter.maxHealth
     } else {
@@ -75,48 +60,26 @@ suspend fun PipelineContext<Unit, ApplicationCall>.setHealth(command: SlashComma
 
     val updated = Characters.updateHealth(targetCharacter, adjustedNewHealth, tempHealth)!!
 
-    if(targetCharacter.hidden) {
-        send {
-            ephemeralMessage {
-                channel = command.channelId
-                user = command.userId
+    message {
+        channel = command.channelId
 
-                attachment {
-                    if (max) {
-                        fallback = "${targetCharacter.characterName}'s max HP is now $adjustedNewHealth."
-                        color = "#FF00FF"
-                    } else {
-                        fallback = "${targetCharacter.characterName} now has $adjustedNewHealth HP."
-                        color = "#0000FF"
-                    }
-                    text = fallback
-                }
-
-                if (!updated.hidden) {
-                    characterInfo(updated)
-                }
+        attachment {
+            if (max) {
+                fallback = "${targetCharacter.characterName}'s max HP is now $adjustedNewHealth."
+                color = "#FF00FF"
+            } else {
+                fallback = "${targetCharacter.characterName} now has $adjustedNewHealth HP."
+                color = "#0000FF"
             }
+            text = fallback
         }
-    } else {
-        send {
-            message {
-                channel = command.channelId
 
-                attachment {
-                    if (max) {
-                        fallback = "${targetCharacter.characterName}'s max HP is now $adjustedNewHealth."
-                        color = "#FF00FF"
-                    } else {
-                        fallback = "${targetCharacter.characterName} now has $adjustedNewHealth HP."
-                        color = "#0000FF"
-                    }
-                    text = fallback
-                }
+        characterInfo(updated, overrideHidden = true)
 
-                if (!updated.hidden) {
-                    characterInfo(updated)
-                }
-            }
+        if(targetCharacter.hidden) {
+            sendEphemeral(command.userId)
+        } else {
+            send()
         }
     }
 

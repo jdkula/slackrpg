@@ -19,17 +19,17 @@ suspend fun PipelineContext<Unit, ApplicationCall>.heal(command: SlashCommand) {
     val enactor = match?.groups?.get(3)?.value?.trim()
 
     if (target == null || heal == null) {
-        send {
-            ephemeralMessage {
-                user = command.userId
-                channel = command.channelId
+        ephemeralMessage {
+            user = command.userId
+            channel = command.channelId
 
-                attachment {
-                    fallback = "I couldn't understand what you're trying to get me to do."
-                    text = fallback
-                    color = "#FF0000"
-                }
+            attachment {
+                fallback = "I couldn't understand what you're trying to get me to do."
+                text = fallback
+                color = "#FF0000"
             }
+
+            send()
         }
         call.respond(HttpStatusCode.OK)
         return
@@ -38,17 +38,16 @@ suspend fun PipelineContext<Unit, ApplicationCall>.heal(command: SlashCommand) {
     val targetCharacter = Characters[target]
 
     if (targetCharacter == null) {
-        send {
-            ephemeralMessage {
-                user = command.userId
-                channel = command.channelId
+        ephemeralMessage {
+            user = command.userId
+            channel = command.channelId
 
-                attachment {
-                    fallback = "I couldn't find your target!"
-                    text = fallback
-                    color = "#FF0000"
-                }
+            attachment {
+                fallback = "I couldn't find your target!"
+                text = fallback
+                color = "#FF0000"
             }
+            send()
         }
         call.respond(HttpStatusCode.OK)
         return
@@ -57,18 +56,17 @@ suspend fun PipelineContext<Unit, ApplicationCall>.heal(command: SlashCommand) {
     val fromCharacter = Characters[enactor, command.userId]
 
     if (fromCharacter == null) {
-        send {
-            ephemeralMessage {
-                user = command.userId
-                channel = command.channelId
+        ephemeralMessage {
+            user = command.userId
+            channel = command.channelId
 
-                attachment {
-                    fallback =
-                            "I couldn't find who's healing... either register a character, or specify who's attacking."
-                    text = fallback
-                    color = "#FF0000"
-                }
+            attachment {
+                fallback =
+                        "I couldn't find who's healing... either register a character, or specify who's attacking."
+                text = fallback
+                color = "#FF0000"
             }
+            send()
         }
         call.respond(HttpStatusCode.OK)
         return
@@ -77,32 +75,32 @@ suspend fun PipelineContext<Unit, ApplicationCall>.heal(command: SlashCommand) {
     var newHealth: Int = targetCharacter.currentHealth + heal
     var newTempHealth: Int = targetCharacter.tempHealth
 
-    if(targetCharacter.currentHealth + heal > targetCharacter.maxHealth) {
+    if (targetCharacter.currentHealth + heal > targetCharacter.maxHealth) {
         newHealth = targetCharacter.maxHealth
         newTempHealth = (targetCharacter.currentHealth + heal) - targetCharacter.maxHealth + targetCharacter.tempHealth
     }
 
     val updated = Characters.updateHealth(targetCharacter, newHealth, newTempHealth)!!
 
-    val targetName = if(targetCharacter == fromCharacter) "themself" else targetCharacter.characterName
+    val targetName = if (targetCharacter == fromCharacter) "themself" else targetCharacter.characterName
 
-    send {
-        message {
-            channel = command.channelId
-            icon_url = fromCharacter.characterImage
-            username = fromCharacter.characterName
+    message {
+        channel = command.channelId
+        icon_url = fromCharacter.characterImage
+        username = fromCharacter.characterName
 
-            attachment {
-                fallback = "${fromCharacter.characterName} heals $targetName for $heal health!"
-                text = fallback
+        attachment {
+            fallback = "${fromCharacter.characterName} heals $targetName for $heal health!"
+            text = fallback
 
-                color = "#00FF00"
-            }
-
-            if(!updated.hidden) {
-                characterInfo(updated)
-            }
+            color = "#00FF00"
         }
+
+        if (!updated.hidden) {
+            characterInfo(updated)
+        }
+
+        send()
     }
     call.respond(HttpStatusCode.OK)
 }

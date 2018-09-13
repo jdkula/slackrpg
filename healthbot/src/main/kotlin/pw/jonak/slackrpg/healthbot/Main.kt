@@ -53,6 +53,7 @@ fun Application.main() {
     }
 }
 
+@MessageDsl
 fun IMessageBuilder.characterInfo(
     character: Character,
     overrideHidden: Boolean = false,

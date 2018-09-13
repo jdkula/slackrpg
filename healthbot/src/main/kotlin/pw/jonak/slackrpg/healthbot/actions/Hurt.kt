@@ -19,57 +19,25 @@ suspend fun PipelineContext<Unit, ApplicationCall>.hurt(command: SlashCommand) {
     val damage = match?.groups?.get(2)?.value?.trim()?.toIntOrNull()
     val enactor = match?.groups?.get(3)?.value?.trim()
 
-    if (target == null || damage == null) {
-        send {
-            ephemeralMessage {
-                user = command.userId
-                channel = command.channelId
-
-                attachment {
-                    fallback = "I couldn't understand what you're trying to get me to do."
-                    text = fallback
-                    color = "#FF0000"
-                }
-            }
-        }
-        call.respond(HttpStatusCode.OK)
-        return
-    }
-
     val targetCharacter = Characters[target]
-
-    if (targetCharacter == null) {
-        send {
-            ephemeralMessage {
-                user = command.userId
-                channel = command.channelId
-
-                attachment {
-                    fallback = "I couldn't find your target!"
-                    text = fallback
-                    color = "#FF0000"
-                }
-            }
-        }
-        call.respond(HttpStatusCode.OK)
-        return
-    }
 
     val fromCharacter = Characters[enactor, command.userId]
 
-    if (fromCharacter == null) {
-        send {
-            ephemeralMessage {
-                user = command.userId
-                channel = command.channelId
+    if (targetCharacter == null || damage == null || fromCharacter == null) { // Error case
+        ephemeralMessage {
+            user = command.userId
+            channel = command.channelId
 
-                attachment {
-                    fallback =
-                            "I couldn't find who's attacking... either register a character, or specify who's attacking."
-                    text = fallback
-                    color = "#FF0000"
+            attachment {
+                fallback = when {
+                    damage == null -> "I couldn't understand what you're trying to get me to do."
+                    targetCharacter == null -> "I couldn't find your target!"
+                    else -> "I couldn't find who's attacking... either register a character, or specify who's attacking."
                 }
+                text = fallback
+                color = "#FF0000"
             }
+            send()
         }
         call.respond(HttpStatusCode.OK)
         return
@@ -78,30 +46,32 @@ suspend fun PipelineContext<Unit, ApplicationCall>.hurt(command: SlashCommand) {
     val damageDone = max(damage - targetCharacter.tempHealth, 0)
     val newTempHealth = max(targetCharacter.tempHealth - damage, 0)
 
-    val updated = Characters.updateHealth(targetCharacter,
+    val updated = Characters.updateHealth(
+        targetCharacter,
         Integer.max(targetCharacter.currentHealth - damageDone, -targetCharacter.maxHealth),
         newTempHealth
     )!!
 
-    val targetName = if(fromCharacter == targetCharacter) "themself" else targetCharacter.characterName
+    val targetName = if (fromCharacter == targetCharacter) "themself" else targetCharacter.characterName
 
-    send {
-        message {
-            channel = command.channelId
-            icon_url = fromCharacter.characterImage
-            username = fromCharacter.characterName
+    message {
+        channel = command.channelId
+        icon_url = fromCharacter.characterImage
+        username = fromCharacter.characterName
 
-            attachment {
-                fallback = "${fromCharacter.characterName} attacks $targetName for $damage damage!"
-                text = fallback
+        attachment {
+            fallback = "${fromCharacter.characterName} attacks $targetName for $damage damage!"
+            text = fallback
 
-                color = "#FF0000"
-            }
-
-            if(!updated.hidden) {
-                characterInfo(updated)
-            }
+            color = "#FF0000"
         }
+
+        if (!updated.hidden) {
+            characterInfo(updated)
+        }
+
+        send()
     }
+
     call.respond(HttpStatusCode.OK)
 }

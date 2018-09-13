@@ -7,41 +7,27 @@ import io.ktor.pipeline.PipelineContext
 import io.ktor.response.respond
 import pw.jonak.slackrpg.rollbot.sql.Macros
 import pw.jonak.slackrpg.slack.SlashCommand
-import pw.jonak.slackrpg.slack.attachment
 import pw.jonak.slackrpg.slack.ephemeralMessage
-import pw.jonak.slackrpg.slack.send
 
 suspend fun PipelineContext<Unit, ApplicationCall>.delete(command: SlashCommand) {
     val macroName = command.text.trim()
 
-    if (Macros[command.userId, macroName] == null) {
-        val text = "It doesn't look like the macro $macroName exists."
-        send {
-            ephemeralMessage {
-                channel = command.channelId
-                user = command.userId
+    ephemeralMessage {
+        channel = command.channelId
+        user = command.userId
 
-                attachment {
-                    fallback = text
-                    color = "#FF0000"
-                    this.text = text
-                }
+        attachment {
+            if (Macros[command.userId, macroName] == null) {  // Fail case
+                fallback = "It doesn't look like the macro $macroName exists."
+                color = "#FF0000"
+            } else {  // Success case
+                Macros.delete(command.userId, macroName)
+                fallback = "$macroName has been deleted."
+                color = "#800080"
             }
+            text = fallback
         }
-    } else {
-        Macros.delete(command.userId, macroName)
-        send {
-            ephemeralMessage {
-                channel = command.channelId
-                user = command.userId
-
-                attachment {
-                    fallback = "$macroName has been deleted."
-                    color = "#800080"
-                    text = "$macroName has been deleted."
-                }
-            }
-        }
+        send()
     }
 
     call.respond(HttpStatusCode.OK)

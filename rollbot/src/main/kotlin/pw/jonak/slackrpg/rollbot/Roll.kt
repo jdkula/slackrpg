@@ -17,6 +17,8 @@ class Roll(
     finishOperations: List<Operation>,
     random: Random = Random()
 ) {
+    var description: String? = null
+
     private val _results = ArrayList<Result>()
     val results: List<Result> get() = _results
     private var successes: Int? = null
@@ -27,7 +29,12 @@ class Roll(
             _results += thisRoll
             rollingOperations.forEach { op -> op.apply(numSides, listOf(thisRoll))?.let { _results.addAll(it) } }
         }
-        finishOperations.forEach { op -> op.apply(numSides, results)?.let { _results.addAll(it) } }
+        finishOperations.forEach { op ->
+            op.apply(numSides, results)?.let { _results.addAll(it) }
+            if(op is Description) {
+                description = op.text
+            }
+        }
 
         var success_count = 0
         var failure_count = 0
@@ -86,7 +93,7 @@ class Roll(
 
             val random: Random = SecureRandom()
 
-            if(str.isEmpty()) {
+            if (str.isEmpty()) {
                 return listOf(Roll("1d20", 1, 20, 0, listOf(), listOf(), random))
             }
 
@@ -164,11 +171,16 @@ class Roll(
                             finishOperations.add(op)
                             i += adv
                         }
+                        '[' -> {
+                            val (op, adv) = Description.parse(str.substring(i))
+                            finishOperations.add(op)
+                            i += adv
+                        }
                         '+', '-' -> {
-                            if (str[i] == '+' && (str.indexOf('+', i + 1) > str.indexOf('d', i + 1) || (str.indexOf(
-                                    '+',
-                                    i + 1
-                                ) == -1) && str.indexOf('d', i + 1) != -1)
+                            if (str[i] == '+'
+                                && (str.indexOf('+', i + 1) > str.indexOf('d', i + 1)
+                                        || (str.indexOf('+', i + 1) == -1)
+                                        && str.indexOf('d', i + 1) != -1)
                             ) {
                                 diceString = str.substring(diceStringStart, i)
                                 break@option
