@@ -9,7 +9,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class Roll(
-    val request: String,
+    var request: String,
     val numDice: Int,
     val numSides: Int,
     val modifier: Int,
@@ -59,6 +59,11 @@ class Roll(
                 sort()
                 reverse()
             }
+        }
+
+        description?.let { description ->
+            request = request.replace(description, "")
+            request = request.trim('[', ']', '+', ' ', '\t', '\n')
         }
     }
 
@@ -199,6 +204,7 @@ class Roll(
                             modifier = str.slice(start until end).toInt()
                             i = end
                         }
+                        ' ' -> i++
                         else -> {
                             diceString = str.substring(diceStringStart, i)
                             break@option
