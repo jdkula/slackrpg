@@ -1,10 +1,10 @@
 package pw.jonak.slackrpg.rollbot.operations
 
+import InfiniteLoop
 import pw.jonak.slackrpg.rollbot.ComparePoint
 import pw.jonak.slackrpg.rollbot.MAX_ITERATION
 import pw.jonak.slackrpg.rollbot.Operation
 import pw.jonak.slackrpg.rollbot.Result
-import sun.awt.SunToolkit
 import java.util.*
 
 class Reroll(cp: ComparePoint, rerollOnce: Boolean, private val random: Random = Random()) : Operation {
@@ -19,7 +19,7 @@ class Reroll(cp: ComparePoint, rerollOnce: Boolean, private val random: Random =
         res.forEach {
             var rerolled = false
             do {
-                if (currentIter > MAX_ITERATION) throw SunToolkit.InfiniteLoop()
+                if (currentIter > MAX_ITERATION) throw InfiniteLoop()
                 currentIter += 1
 
                 for (cp in cps.keys) {

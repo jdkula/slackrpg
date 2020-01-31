@@ -1,11 +1,12 @@
 package pw.jonak.slackrpg.slack
 
 import com.beust.klaxon.Klaxon
+import com.beust.klaxon.KlaxonException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 
 object Users {
     lateinit var users: List<User>
@@ -16,7 +17,11 @@ object Users {
             val userInfo = client.get<String>("https://slack.com/api/users.list") {
                 header("Authorization", "Bearer " + System.getenv("SLACK_OAUTH"))
             }
-            val parsed = Klaxon().parse<Members>(userInfo)
+            val parsed = try {
+                Klaxon().parse<Members>(userInfo)
+            } catch (e: KlaxonException) {
+                null
+            }
             if (parsed != null) {
                 users = parsed.members
             }

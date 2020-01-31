@@ -3,7 +3,7 @@ package pw.jonak.slackrpg.healthbot.actions
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
-import io.ktor.pipeline.PipelineContext
+import io.ktor.util.pipeline.PipelineContext
 import io.ktor.response.respond
 import pw.jonak.slackrpg.healthbot.characterInfo
 import pw.jonak.slackrpg.healthbot.sql.Characters
@@ -48,7 +48,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.hurt(command: SlashCommand) {
 
     val updated = Characters.updateHealth(
         targetCharacter,
-        Integer.max(targetCharacter.currentHealth - damageDone, -targetCharacter.maxHealth),
+        max(targetCharacter.currentHealth - damageDone, -targetCharacter.maxHealth),
         newTempHealth
     )!!
 

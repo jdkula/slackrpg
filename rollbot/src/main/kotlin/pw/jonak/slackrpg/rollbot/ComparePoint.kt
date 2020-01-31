@@ -1,6 +1,6 @@
 package pw.jonak.slackrpg.rollbot
 
-import sun.awt.SunToolkit
+import InfiniteLoop
 
 enum class Comparison {
     EQUAL,
@@ -29,7 +29,7 @@ class ComparePoint(private val c: Comparison, private val n: Int) {
             var i = if(str[0].isDigit()) 0 else 1
             val start = i
             while(i < str.length) {
-                if(currentIter > MAX_ITERATION) throw SunToolkit.InfiniteLoop()
+                if(currentIter > MAX_ITERATION) throw InfiniteLoop()
                 currentIter += 1
 
                 if(!str[i].isDigit()) {

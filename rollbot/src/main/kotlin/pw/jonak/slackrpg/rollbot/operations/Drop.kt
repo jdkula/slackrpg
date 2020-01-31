@@ -1,9 +1,9 @@
 package pw.jonak.slackrpg.rollbot.operations
 
+import InfiniteLoop
 import pw.jonak.slackrpg.rollbot.MAX_ITERATION
 import pw.jonak.slackrpg.rollbot.Operation
 import pw.jonak.slackrpg.rollbot.Result
-import sun.awt.SunToolkit
 import kotlin.math.min
 
 class Drop(private val numDrop: Int, private val fromTop: Boolean) : Operation {
@@ -35,7 +35,7 @@ class Drop(private val numDrop: Int, private val fromTop: Boolean) : Operation {
 
                 var end = start
                 while(end < str.length) {
-                    if(currentIter > MAX_ITERATION) throw SunToolkit.InfiniteLoop()
+                    if(currentIter > MAX_ITERATION) throw InfiniteLoop()
                     currentIter += 1
 
                     if(!str[end].isDigit()) {

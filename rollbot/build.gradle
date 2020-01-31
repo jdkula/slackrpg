@@ -3,3 +3,5 @@ shadowJar {
     version = null
     destinationDir = new File("dist")
 }
+
+mainClassName = 'io.ktor.server.netty.DevelopmentEngine'

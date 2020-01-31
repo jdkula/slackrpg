@@ -1,15 +1,15 @@
 package pw.jonak.slackrpg.rollbot.actions
 
+import InfiniteLoop
 import io.ktor.application.ApplicationCall
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
-import io.ktor.pipeline.PipelineContext
+import io.ktor.util.pipeline.PipelineContext
 import io.ktor.response.respond
 import io.ktor.response.respondText
 import pw.jonak.slackrpg.rollbot.Roll
 import pw.jonak.slackrpg.rollbot.RollInfo
 import pw.jonak.slackrpg.slack.*
-import sun.awt.SunToolkit
 import java.security.InvalidParameterException
 
 suspend fun PipelineContext<Unit, ApplicationCall>.roll(command: SlashCommand) {
@@ -96,7 +96,7 @@ suspend fun PipelineContext<Unit, ApplicationCall>.doRoll(
             send()
         }
         context.respond(HttpStatusCode.OK)
-    } catch (e: SunToolkit.InfiniteLoop) {
+    } catch (e: InfiniteLoop) {
         context.respondText("Roll Caused Infinite Loop", ContentType.Text.Plain, HttpStatusCode.BadRequest)
     } catch (e: InvalidParameterException) {
         ephemeralMessage {

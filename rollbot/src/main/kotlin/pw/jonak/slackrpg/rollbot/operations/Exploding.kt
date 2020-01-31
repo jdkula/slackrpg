@@ -1,7 +1,7 @@
 package pw.jonak.slackrpg.rollbot.operations
 
+import InfiniteLoop
 import pw.jonak.slackrpg.rollbot.*
-import sun.awt.SunToolkit
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -10,7 +10,7 @@ class Exploding(private val cp: ComparePoint, private val random: Random = Rando
     override fun apply(sides: Int, res: List<Result>): List<Result>? {
         var currentIter = 0
         tailrec fun helper(res: List<Result>, acc: ArrayList<Result> = ArrayList()): List<Result> {
-            if(currentIter >= MAX_ITERATION) throw SunToolkit.InfiniteLoop()
+            if(currentIter >= MAX_ITERATION) throw InfiniteLoop()
             if (res.isEmpty()) return acc
             val result = ArrayList<Result>()
             res.forEach {

@@ -3,7 +3,7 @@ package pw.jonak.slackrpg.rollbot.actions
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
-import io.ktor.pipeline.PipelineContext
+import io.ktor.util.pipeline.PipelineContext
 import io.ktor.response.respond
 import pw.jonak.slackrpg.rollbot.sql.Macro
 import pw.jonak.slackrpg.rollbot.sql.Macros

@@ -7,15 +7,15 @@ function parseDice(roll) {
         let total = rollResult.modifier;
         for(let result of rollResult.results) {
             let cls = "roll_result";
-            let rln = result[1].roll;
+            let rln = result.roll;
             let xtra = "";
-            if(result[1].dropped) {
+            if(result.dropped) {
                 cls += " dropped";
                 xtra = `<span class="accessible_only">drop </span>`;
             }
             results.push(`<span class="${cls}">${xtra}${rln}</span>`);
-            if(result[1].dropped !== true) {
-                total += result[1].roll;
+            if(result.dropped !== true) {
+                total += result.roll;
             }
         }
         let modtext = "";
@@ -36,7 +36,6 @@ function parseDice(roll) {
 $(document).ready(function () {
     const output = $("#output");
     const roll = $("#roll");
-    const rollButton = $("#rollbutton");
     const form = $("#diceroller");
 
     form.submit(function (e) {
@@ -44,10 +43,11 @@ $(document).ready(function () {
         let xhr = new XMLHttpRequest();
         xhr.addEventListener('load', function () {
             let txt = xhr.responseText;
-            let parsed = "";
+            let parsed;
             try {
                 parsed = parseDice(txt);
             } catch (e) {
+                console.error(e);
                 parsed = txt
             }
             output.html(parsed).show();
@@ -58,7 +58,7 @@ $(document).ready(function () {
         });
         let url = `${window.location.protocol}//${window.location.host}/dice`;
         xhr.open("POST", url);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         let urlEncodedData = encodeURIComponent("roll") + "=" + encodeURIComponent(roll.val());
         urlEncodedData = urlEncodedData.replace(/%20/g, '+');
         xhr.send(urlEncodedData);

@@ -1,10 +1,9 @@
 package pw.jonak.slackrpg.rollbot.operations
 
+import InfiniteLoop
 import pw.jonak.slackrpg.rollbot.MAX_ITERATION
 import pw.jonak.slackrpg.rollbot.Operation
 import pw.jonak.slackrpg.rollbot.Result
-import sun.awt.SunToolkit
-
 class Keep(private val numKeep: Int, private val fromBottom: Boolean) : Operation {
     override fun apply(sides: Int, res: List<Result>): List<Result>? {
         val sorted = res.sorted().filter { !it.dropped }.let { if(fromBottom) it.reversed() else it }
@@ -34,7 +33,7 @@ class Keep(private val numKeep: Int, private val fromBottom: Boolean) : Operatio
 
                 var end = start
                 while(end < str.length) {
-                    if(currentIter > MAX_ITERATION) throw SunToolkit.InfiniteLoop()
+                    if(currentIter > MAX_ITERATION) throw InfiniteLoop()
                     currentIter += 1
 
                     if(!str[end].isDigit()) {

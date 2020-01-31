@@ -2,11 +2,10 @@ package pw.jonak.slackrpg.healthbot.actions
 
 import io.ktor.application.ApplicationCall
 import io.ktor.application.call
-import io.ktor.pipeline.PipelineContext
+import io.ktor.util.pipeline.PipelineContext
 import io.ktor.response.respond
-import pw.jonak.slackrpg.slack.SlashCommand
 
-suspend fun PipelineContext<Unit, ApplicationCall>.help(command: SlashCommand) {
+suspend fun PipelineContext<Unit, ApplicationCall>.help() {
     call.respond(
         """
             *Healthbot Help*

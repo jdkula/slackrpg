@@ -11,10 +11,10 @@ inline fun message(addInfo: MessageBuilder.() -> Unit): Message {
 }
 
 @MessageDsl
-inline fun ephemeralMessage(addInfo: EphemeralMessageBuilder.() -> Unit) {
+inline fun ephemeralMessage(addInfo: EphemeralMessageBuilder.() -> Unit): EphemeralMessage {
     val messageStart = EphemeralMessageBuilder()
     messageStart.addInfo()
-    messageStart.build()
+    return messageStart.build()
 }
 
 interface IMessageBuilder {

@@ -1,7 +1,7 @@
 package pw.jonak.slackrpg.rollbot
 
+import InfiniteLoop
 import pw.jonak.slackrpg.rollbot.operations.*
-import sun.awt.SunToolkit
 import java.lang.Integer.max
 import java.security.InvalidParameterException
 import java.security.SecureRandom
@@ -15,7 +15,7 @@ class Roll(
     val modifier: Int,
     rollingOperations: List<Operation>,
     finishOperations: List<Operation>,
-    random: Random = Random()
+    random: Random = SecureRandom()
 ) {
     var description: String? = null
 
@@ -133,7 +133,7 @@ class Roll(
                 i = end
                 // Do Option processing
                 option@ while (i < str.length) {
-                    if (currentIter > MAX_ITERATION) throw SunToolkit.InfiniteLoop()
+                    if (currentIter > MAX_ITERATION) throw InfiniteLoop()
                     currentIter += 1
                     when (str[i]) {
                         '=', '>', '<' -> {
@@ -191,7 +191,7 @@ class Roll(
                             start = i
                             end = start + 1
                             while (end < str.length) {
-                                if (currentIter > MAX_ITERATION) throw SunToolkit.InfiniteLoop()
+                                if (currentIter > MAX_ITERATION) throw InfiniteLoop()
                                 currentIter += 1
 
                                 if (!str[end].isDigit()) {

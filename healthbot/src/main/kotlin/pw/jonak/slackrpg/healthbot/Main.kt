@@ -47,7 +47,7 @@ fun Application.main() {
                 "/setmaxhealth" -> setHealth(command, max = true)
                 "/unregister" -> unregister(command)
                 "/info" -> info(command)
-                "/healthhelp" -> help(command)
+                "/healthhelp" -> help()
             }
         }
     }
